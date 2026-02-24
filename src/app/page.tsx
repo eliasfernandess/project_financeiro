@@ -7,9 +7,9 @@ import {
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
+  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   PieChart,
   Pie,
@@ -23,17 +23,27 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { useTransactions } from '@/lib/hooks';
+import { useTransactions, useCategories, useGoals } from '@/lib/hooks';
 import { mockCategories } from '@/lib/mock-data';
 import { DynamicIcon } from '@/components/dynamic-icon';
+import { AIChat } from '@/components/ai-chat';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Bom dia ☀️';
+  if (hour < 18) return 'Boa tarde 🌤️';
+  return 'Boa noite 🌙';
+}
+
 export default function DashboardPage() {
   const { transactions } = useTransactions();
+  const { categories } = useCategories();
+  const { goals } = useGoals();
 
   const totalIncome = useMemo(
     () => transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0),
@@ -82,74 +92,85 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Visão geral das suas finanças</p>
+      {/* Greeting */}
+      <div className="animate-slide-down">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          {getGreeting()}
+        </h1>
+        <p className="text-muted-foreground mt-1 flex items-center gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-primary" />
+          Visão geral das suas finanças
+        </p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card className="relative overflow-hidden">
+        <Card className="relative overflow-hidden glass-card animate-slide-up delay-1 group hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Receitas</CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            <div className="h-10 w-10 rounded-xl gradient-income flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
+              <TrendingUp className="h-5 w-5 text-white" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-emerald-500">{formatCurrency(totalIncome)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total acumulado</p>
           </CardContent>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 gradient-income" />
         </Card>
 
-        <Card className="relative overflow-hidden">
+        <Card className="relative overflow-hidden glass-card animate-slide-up delay-2 group hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Despesas</CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <TrendingDown className="h-4 w-4 text-red-500" />
+            <div className="h-10 w-10 rounded-xl gradient-expense flex items-center justify-center shadow-lg shadow-red-500/20 group-hover:scale-110 transition-transform duration-300">
+              <TrendingDown className="h-5 w-5 text-white" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-500">{formatCurrency(totalExpense)}</div>
+            <p className="text-xs text-muted-foreground mt-1">Total acumulado</p>
           </CardContent>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-red-400" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 gradient-expense" />
         </Card>
 
-        <Card className="relative overflow-hidden sm:col-span-2 lg:col-span-1">
+        <Card className="relative overflow-hidden glass-card animate-slide-up delay-3 group sm:col-span-2 lg:col-span-1 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Saldo</CardTitle>
-            <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Wallet className="h-4 w-4 text-blue-500" />
+            <div className="h-10 w-10 rounded-xl gradient-balance flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
+              <Wallet className="h-5 w-5 text-white" />
             </div>
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${balance >= 0 ? 'text-blue-500' : 'text-red-500'}`}>
               {formatCurrency(balance)}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Receitas − Despesas</p>
           </CardContent>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400" />
+          <div className="absolute bottom-0 left-0 right-0 h-1 gradient-balance" />
         </Card>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie Chart */}
-        <Card>
+        <Card className="glass-card animate-slide-up delay-4">
           <CardHeader>
             <CardTitle className="text-base">Despesas por Categoria</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={categoryExpenses}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
+                    innerRadius={55}
+                    outerRadius={95}
                     paddingAngle={4}
                     dataKey="value"
+                    animationBegin={200}
+                    animationDuration={800}
                   >
                     {categoryExpenses.map((entry, i) => (
                       <Cell key={i} fill={entry.color} stroke="transparent" />
@@ -158,10 +179,11 @@ export default function DashboardPage() {
                   <Tooltip
                     formatter={(value) => formatCurrency(Number(value ?? 0))}
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
+                      backgroundColor: 'hsl(var(--popover))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
+                      borderRadius: '12px',
                       color: 'hsl(var(--foreground))',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                     }}
                   />
                 </PieChart>
@@ -180,12 +202,12 @@ export default function DashboardPage() {
         </Card>
 
         {/* Bar Chart */}
-        <Card>
+        <Card className="glass-card animate-slide-up delay-5">
           <CardHeader>
             <CardTitle className="text-base">Receita vs Despesa</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
+            <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData} barGap={8}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -194,15 +216,16 @@ export default function DashboardPage() {
                   <Tooltip
                     formatter={(value) => formatCurrency(Number(value ?? 0))}
                     contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
+                      backgroundColor: 'hsl(var(--popover))',
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
+                      borderRadius: '12px',
                       color: 'hsl(var(--foreground))',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="income" name="Receita" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="expense" name="Despesa" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="income" name="Receita" fill="#22c55e" radius={[6, 6, 0, 0]} animationBegin={400} animationDuration={800} />
+                  <Bar dataKey="expense" name="Despesa" fill="#ef4444" radius={[6, 6, 0, 0]} animationBegin={600} animationDuration={800} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -211,19 +234,22 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Transactions */}
-      <Card>
+      <Card className="glass-card animate-slide-up delay-6">
         <CardHeader>
           <CardTitle className="text-base">Últimas Transações</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {recentTransactions.map(tx => {
+          <div className="space-y-2">
+            {recentTransactions.map((tx, i) => {
               const cat = mockCategories.find(c => c.id === tx.category_id);
               return (
-                <div key={tx.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors">
+                <div
+                  key={tx.id}
+                  className={`flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-all duration-200 animate-slide-up delay-${i + 1}`}
+                >
                   <div
-                    className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: cat ? `${cat.color}15` : '#64748b15' }}
+                    className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: cat ? `${cat.color}20` : '#64748b20' }}
                   >
                     <DynamicIcon
                       name={cat?.icon || 'Tag'}
@@ -253,6 +279,13 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* AI Chat (desktop floating) */}
+      <AIChat
+        transactions={transactions}
+        categories={categories}
+        goals={goals}
+      />
     </div>
   );
 }

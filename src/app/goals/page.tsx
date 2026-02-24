@@ -5,7 +5,6 @@ import { Plus, Pencil, Trash2, PiggyBank, Calendar, TrendingUp } from 'lucide-re
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { useGoals } from '@/lib/hooks';
 import { GoalModal, AddAmountModal } from '@/components/goal-modal';
 import { Goal } from '@/lib/types';
@@ -31,24 +30,24 @@ export default function GoalsPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Metas de Economia</h1>
                     <p className="text-muted-foreground mt-1">Acompanhe o progresso das suas economias</p>
                 </div>
-                <Button onClick={() => { setEditingGoal(null); setModalOpen(true); }} className="gap-2">
+                <Button onClick={() => { setEditingGoal(null); setModalOpen(true); }} className="gap-2 gradient-primary border-0 text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:scale-105 transition-all duration-200">
                     <Plus className="h-4 w-4" />
                     Nova Meta
                 </Button>
             </div>
 
             {/* Overall Progress */}
-            <Card className="relative overflow-hidden">
+            <Card className="relative overflow-hidden glass-card animate-slide-up delay-1">
                 <CardContent className="p-6">
                     <div className="flex items-center gap-4 mb-4">
-                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <PiggyBank className="h-6 w-6 text-primary" />
+                        <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                            <PiggyBank className="h-7 w-7 text-white" />
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Progresso Total</p>
@@ -58,26 +57,31 @@ export default function GoalsPage() {
                     <Progress value={overallProgress} className="h-3" />
                     <p className="text-xs text-muted-foreground mt-2">{overallProgress.toFixed(1)}% concluído</p>
                 </CardContent>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16" />
+                <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full -mr-20 -mt-20" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/5 rounded-full -ml-12 -mb-12" />
             </Card>
 
             {/* Goal Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {goals.map(goal => {
+                {goals.map((goal, i) => {
                     const progress = goal.target_amount > 0 ? (goal.current_amount / goal.target_amount) * 100 : 0;
                     const remaining = goal.target_amount - goal.current_amount;
                     const daysLeft = goal.deadline ? differenceInDays(parseISO(goal.deadline), new Date()) : null;
+                    const isComplete = progress >= 100;
 
                     return (
-                        <Card key={goal.id} className="group hover:shadow-md transition-shadow">
+                        <Card key={goal.id} className={`group glass-card hover:shadow-xl transition-all duration-300 animate-slide-up delay-${Math.min(i + 2, 8)}`}>
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between">
-                                    <CardTitle className="text-base font-semibold">{goal.name}</CardTitle>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2">
+                                        {isComplete && <span className="text-lg">🎉</span>}
+                                        <CardTitle className="text-base font-semibold">{goal.name}</CardTitle>
+                                    </div>
+                                    <div className="flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8"
+                                            className="h-8 w-8 rounded-xl"
                                             onClick={() => { setEditingGoal(goal); setModalOpen(true); }}
                                         >
                                             <Pencil className="h-3.5 w-3.5" />
@@ -85,7 +89,7 @@ export default function GoalsPage() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8"
+                                            className="h-8 w-8 rounded-xl"
                                             onClick={() => deleteGoal(goal.id)}
                                         >
                                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
@@ -101,16 +105,16 @@ export default function GoalsPage() {
                                     </div>
                                     <Progress
                                         value={progress}
-                                        className="h-2.5"
+                                        className="h-3"
                                     />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="p-3 rounded-lg bg-accent/50">
+                                    <div className="p-3 rounded-xl glass-surface">
                                         <p className="text-xs text-muted-foreground">Economizado</p>
                                         <p className="text-sm font-semibold text-emerald-500">{formatCurrency(goal.current_amount)}</p>
                                     </div>
-                                    <div className="p-3 rounded-lg bg-accent/50">
+                                    <div className="p-3 rounded-xl glass-surface">
                                         <p className="text-xs text-muted-foreground">Faltam</p>
                                         <p className="text-sm font-semibold">{formatCurrency(remaining)}</p>
                                     </div>
@@ -132,10 +136,9 @@ export default function GoalsPage() {
                                     </div>
                                     <Button
                                         size="sm"
-                                        variant="outline"
-                                        className="gap-1.5 text-xs"
+                                        className="gap-1.5 text-xs rounded-xl gradient-primary border-0 text-white shadow-md"
                                         onClick={() => setAddAmountGoal(goal)}
-                                        disabled={progress >= 100}
+                                        disabled={isComplete}
                                     >
                                         <TrendingUp className="h-3 w-3" />
                                         Adicionar

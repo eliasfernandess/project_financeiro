@@ -52,49 +52,49 @@ export default function TransactionsPage() {
     const totalExpense = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Transações</h1>
                     <p className="text-muted-foreground mt-1">Gerencie suas receitas e despesas</p>
                 </div>
-                <Button onClick={() => setModalOpen(true)} className="gap-2">
+                <Button onClick={() => setModalOpen(true)} className="gap-2 gradient-primary border-0 text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:scale-105 transition-all duration-200">
                     <Plus className="h-4 w-4" />
                     Nova Transação
                 </Button>
             </div>
 
             {/* Summary mini cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                        <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                            <ArrowUpRight className="h-5 w-5 text-emerald-500" />
+            <div className="grid grid-cols-2 gap-3">
+                <Card className="glass-card animate-slide-up delay-1">
+                    <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+                        <div className="h-10 w-10 rounded-xl gradient-income flex items-center justify-center shadow-md shrink-0">
+                            <ArrowUpRight className="h-5 w-5 text-white" />
                         </div>
-                        <div>
-                            <p className="text-xs text-muted-foreground">Receitas (filtrado)</p>
-                            <p className="text-lg font-bold text-emerald-500">{formatCurrency(totalIncome)}</p>
+                        <div className="min-w-0">
+                            <p className="text-[10px] sm:text-xs text-muted-foreground">Receitas</p>
+                            <p className="text-sm sm:text-lg font-bold text-emerald-500 truncate">{formatCurrency(totalIncome)}</p>
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                        <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                            <ArrowDownRight className="h-5 w-5 text-red-500" />
+                <Card className="glass-card animate-slide-up delay-2">
+                    <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+                        <div className="h-10 w-10 rounded-xl gradient-expense flex items-center justify-center shadow-md shrink-0">
+                            <ArrowDownRight className="h-5 w-5 text-white" />
                         </div>
-                        <div>
-                            <p className="text-xs text-muted-foreground">Despesas (filtrado)</p>
-                            <p className="text-lg font-bold text-red-500">{formatCurrency(totalExpense)}</p>
+                        <div className="min-w-0">
+                            <p className="text-[10px] sm:text-xs text-muted-foreground">Despesas</p>
+                            <p className="text-sm sm:text-lg font-bold text-red-500 truncate">{formatCurrency(totalExpense)}</p>
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Filters */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-base flex items-center gap-2">
-                        <Filter className="h-4 w-4" />
+            <Card className="glass-card animate-slide-up delay-3">
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-primary" />
                         Filtros
                     </CardTitle>
                 </CardHeader>
@@ -106,11 +106,11 @@ export default function TransactionsPage() {
                                 placeholder="Buscar descrição..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="pl-9"
+                                className="pl-9 rounded-xl"
                             />
                         </div>
                         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                            <SelectTrigger>
+                            <SelectTrigger className="rounded-xl">
                                 <SelectValue placeholder="Categoria" />
                             </SelectTrigger>
                             <SelectContent>
@@ -121,7 +121,7 @@ export default function TransactionsPage() {
                             </SelectContent>
                         </Select>
                         <Select value={typeFilter} onValueChange={setTypeFilter}>
-                            <SelectTrigger>
+                            <SelectTrigger className="rounded-xl">
                                 <SelectValue placeholder="Tipo" />
                             </SelectTrigger>
                             <SelectContent>
@@ -134,15 +134,68 @@ export default function TransactionsPage() {
                 </CardContent>
             </Card>
 
-            {/* Table */}
-            <Card>
+            {/* Mobile: Card list / Desktop: Table */}
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-2">
+                {filtered.length === 0 ? (
+                    <Card className="glass-card">
+                        <CardContent className="text-center py-8 text-muted-foreground">
+                            Nenhuma transação encontrada
+                        </CardContent>
+                    </Card>
+                ) : (
+                    filtered.map((tx, i) => {
+                        const cat = categories.find(c => c.id === tx.category_id);
+                        return (
+                            <Card key={tx.id} className={`glass-card animate-slide-up delay-${Math.min(i + 1, 8)}`}>
+                                <CardContent className="flex items-center gap-3 p-3">
+                                    <div
+                                        className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
+                                        style={{ backgroundColor: cat ? `${cat.color}20` : '#64748b20' }}
+                                    >
+                                        <DynamicIcon
+                                            name={cat?.icon || 'Tag'}
+                                            className="h-4.5 w-4.5"
+                                            style={{ color: cat?.color || '#64748b' }}
+                                        />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-sm truncate">{tx.description}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {cat?.name || 'Sem categoria'} • {format(parseISO(tx.date), 'dd/MM/yyyy')}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        <div className="text-right">
+                                            <span className={`font-semibold text-sm ${tx.type === 'income' ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 touch-visible"
+                                            onClick={() => deleteTransaction(tx.id)}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* Desktop Table */}
+            <Card className="glass-card hidden md:block animate-slide-up delay-4">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Descrição</TableHead>
-                                <TableHead className="hidden sm:table-cell">Categoria</TableHead>
-                                <TableHead className="hidden md:table-cell">Data</TableHead>
+                                <TableHead>Categoria</TableHead>
+                                <TableHead>Data</TableHead>
                                 <TableHead className="text-right">Valor</TableHead>
                                 <TableHead className="w-12"></TableHead>
                             </TableRow>
@@ -162,29 +215,24 @@ export default function TransactionsPage() {
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <div
-                                                        className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-                                                        style={{ backgroundColor: cat ? `${cat.color}15` : '#64748b15' }}
+                                                        className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
+                                                        style={{ backgroundColor: cat ? `${cat.color}20` : '#64748b20' }}
                                                     >
                                                         <DynamicIcon
                                                             name={cat?.icon || 'Tag'}
-                                                            className="h-3.5 w-3.5"
+                                                            className="h-4 w-4"
                                                             style={{ color: cat?.color || '#64748b' }}
                                                         />
                                                     </div>
-                                                    <div>
-                                                        <p className="font-medium text-sm">{tx.description}</p>
-                                                        <p className="text-xs text-muted-foreground sm:hidden">
-                                                            {cat?.name} • {format(parseISO(tx.date), 'dd/MM/yyyy')}
-                                                        </p>
-                                                    </div>
+                                                    <p className="font-medium text-sm">{tx.description}</p>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="hidden sm:table-cell">
-                                                <Badge variant="secondary" className="font-normal">
+                                            <TableCell>
+                                                <Badge variant="secondary" className="font-normal rounded-lg">
                                                     {cat?.name || 'Sem categoria'}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
+                                            <TableCell className="text-muted-foreground text-sm">
                                                 {format(parseISO(tx.date), 'dd/MM/yyyy')}
                                             </TableCell>
                                             <TableCell className="text-right">
